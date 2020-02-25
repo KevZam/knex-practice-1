@@ -66,6 +66,27 @@ describe(`Articles service object`, function() {
       });
     });
 
+    it(`updateArticle() updates an article from the 'blogful_articles' table`, () => {
+      const idOfArticleToUpdate = 3;
+      const newArticleData = {
+        title: "updated title",
+        content: "updated content",
+        date_published: new Date()
+      };
+      return ArticlesService.updateArticle(
+        db,
+        idOfArticleToUpdate,
+        newArticleData
+      )
+        .then(() => ArticlesService.getById(db, idOfArticleToUpdate))
+        .then(article => {
+          expect(article).to.eql({
+            id: idOfArticleToUpdate,
+            ...newArticleData
+          });
+        });
+    });
+
     it(`deleteArticle() removes an article by id from 'blogful_articles' table`, () => {
       const articleId = 3;
       return ArticlesService.deleteArticle(db, articleId)
