@@ -26,8 +26,13 @@ const shoppingListService = {
     return knex("shopping_list")
       .where({ id })
       .update(newItemInfo);
-  }
+  },
   // Delete
+  deleteItem(knex, id) {
+    return knex("shopping_list")
+      .where({ id })
+      .delete();
+  }
 };
 
 module.exports = shoppingListService;

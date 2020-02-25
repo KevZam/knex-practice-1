@@ -86,11 +86,21 @@ describe("Shopping list service object", () => {
         .updateItem(db, idOfItemToUpdate, newInfo)
         .then(() => shoppingListService.getByID(db, idOfItemToUpdate))
         .then(item => {
-          console.log(item);
           expect(item).to.eql({
             id: idOfItemToUpdate,
             ...newInfo
           });
+        });
+    });
+
+    it("deleteItem() deletes an item by id from shopping list", () => {
+      const itemId = 3;
+      return shoppingListService
+        .deleteItem(db, itemId)
+        .then(() => shoppingListService.getAllItems(db))
+        .then(allItems => {
+          const expected = testProducts.filter(item => item.id !== itemId);
+          expect(allItems).to.eql(expected);
         });
     });
   });
