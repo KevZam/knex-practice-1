@@ -45,3 +45,29 @@ function searchByProduceName(searchTerm) {
 }
 
 searchByProduceName("holo");
+
+// paginate the product list with this function. The offset is just where the count starts and the limit is how many
+// products to show
+function paginateProducts(page) {
+  const productsPerPage = 10;
+  const offset = productsPerPage * (page - 1);
+  knexInstance
+    .select("product_id", "name", "price", "category")
+    .from("amazong_products")
+    .limit(productsPerPage)
+    .offset(offset)
+    .then(result => {
+      console.log(result);
+    });
+}
+
+// We use whereNotNull() to specify not null in knex
+function getProductsWithImages() {
+  knexInstance
+    .select("product_id", "name", "price", "category", "image")
+    .from("amazong_products")
+    .whereNotNull("image")
+    .then(result => {
+      console.log(result);
+    });
+}

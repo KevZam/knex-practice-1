@@ -2,8 +2,10 @@ const ArticlesService = require("../src/articles-service");
 const knex = require("knex");
 
 describe(`Articles service object`, function() {
+  // declare the database we will be using for this test
   let db;
 
+  // create the test articles for the test database to test against
   let testArticles = [
     {
       id: 1,
@@ -27,6 +29,8 @@ describe(`Articles service object`, function() {
         "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Possimus, voluptate? Necessitatibus, reiciendis? Cupiditate totam laborum esse animi ratione ipsa dignissimos laboriosam eos similique cumque. Est nostrum esse porro id quaerat."
     }
   ];
+
+  // Before we run any tests, open up a connection to the database with a path from the .env file
   before(() => {
     db = knex({
       client: "pg",
@@ -34,19 +38,49 @@ describe(`Articles service object`, function() {
     });
   });
 
+  // Before we run any tests, clear the database with truncate()
   before(() => db("blogful_articles").truncate());
 
-  before(() => {
-    return db.into("blogful_articles").insert(testArticles);
-  });
+  // clear the database after each test to prevent test leaks (one affecting another)
+  afterEach(() => db("blogful_articles").truncate());
 
+  // clear the connection we set up after the tests are run
   after(() => db.destroy());
 
-  describe(`getAllArticles()`, () => {
-    it(`resolves all articles from 'blogful_articles' table`, () => {
+  context(`Given 'blogful_articles' has data`, () => {
+    //Insert the test articles into the test db we set up
+    before(() => {
+      return db.into("blogful_articles").insert(testArticles);
+    });
+
+    it(`getAllArticles() resolves all articles from 'blogful_articles' table`, () => {
       // test that ArticlesService.getAllArticles gets data from table
       return ArticlesService.getAllArticles(db).then(actual => {
         expect(actual).to.eql(testArticles);
+      });
+    });
+
+    context(`Given 'blogful_articles' has no data`, () => {
+      it(`getAllArticles() resolves an empty array`, () => {
+        return ArticlesService.getAllArticles(db).then(actual => {
+          expect(actual).to.eql([]);
+        });
+      });
+
+      it(`insertArticle() inserts a new article and resolves the new article with an 'id'`, () => {
+        const newArticle = {
+          title: "Test new title",
+          content: "Test new content",
+          date_published: new Date("2020-01-01T00:00:00.000Z")
+        };
+        return ArticlesService.insertArticle(db, newArticle).then(actual => {
+          expect(actual).to.eql({
+            id: 1,
+            title: newArticle.title,
+            content: newArticle.content,
+            date_published: newArticle.date_published
+          });
+        });
       });
     });
   });
